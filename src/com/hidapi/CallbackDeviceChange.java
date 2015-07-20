@@ -10,7 +10,7 @@ public class CallbackDeviceChange extends Thread
 	private DeviceChange m_Callback = null;
 	private String serialNumber = null;
 	
-	private static int previous_counter = -1;
+	private static int previous_counter = 0;
 
 	private CallbackDeviceChange()
 	{}

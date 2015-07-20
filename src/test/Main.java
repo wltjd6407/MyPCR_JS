@@ -1,7 +1,11 @@
 package test;
 
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -60,10 +64,50 @@ public class Main implements DeviceChange
 	
 	
 
-	public static void main(String[] args) 
+	public static void main(String[] args) throws FileNotFoundException 
 	{
+		/*
 		Main m = new Main();
 		while(true);
+		*/
+		Action[] actions = new Action[20];
+		ArrayList<String> list = new ArrayList<String>();
+		int lines = 0;
+		String path = "test.txt";
+		BufferedReader in ;
+		try {
+			in = new BufferedReader(new FileReader(path));
+			String line = null;
+			while( (line = in.readLine()) != null)
+			{
+				list.add(line);
+				
+			}
+			in.close();
+			String first = list.get(0);
+			String last = list.get(list.size()-1);
+			if(first.contains("%PCR%") && last.contains("%END"))
+			{
+				for(int i=1; i<list.size()-2; i++)
+				{
+					String aclists[] = list.get(i).split("\t");
+					actions[lines] = new Action(aclists[0], aclists[1], aclists[2]);
+					lines++;
+				}
+				System.out.println("올바른 프로토콜입니다.");
+				
+				for(int i=0; i<lines; i++)
+				{
+					System.out.println(String.format("label=%s, temp=%s, time=%s",actions[i].label, actions[i].temp, actions[i].time));
+				}
+			}
+			else
+				System.out.println("잘못된 프로토콜입니다.");
+		} catch (IOException e) {
+			// TODO: handle exception
+			System.out.println("파일 없음");
+		}
+		
 	}
 
 }
