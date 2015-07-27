@@ -70,6 +70,7 @@ public class Main implements DeviceChange
 		Main m = new Main();
 		while(true);
 		*/
+	
 		Action[] actions = new Action[20];
 		ArrayList<String> list = new ArrayList<String>();
 		int lines = 0;
@@ -88,7 +89,7 @@ public class Main implements DeviceChange
 			String last = list.get(list.size()-1);
 			if(first.contains("%PCR%") && last.contains("%END"))
 			{
-				for(int i=1; i<list.size()-2; i++)
+				for(int i=1; i<=list.size()-2; i++)
 				{
 					String aclists[] = list.get(i).split("\t");
 					actions[lines] = new Action(aclists[0], aclists[1], aclists[2]);
@@ -103,6 +104,14 @@ public class Main implements DeviceChange
 			}
 			else
 				System.out.println("잘못된 프로토콜입니다.");
+			
+			int time = 0;
+			for(int i=0; i<lines; i++)
+			{
+				time += Integer.parseInt(actions[i].time);
+			}
+			calcTime(time);
+			runProtocol(actions, lines);
 		} catch (IOException e) {
 			// TODO: handle exception
 			System.out.println("파일 없음");
@@ -110,4 +119,47 @@ public class Main implements DeviceChange
 		
 	}
 
+	public static void calcTime(int time)
+	{
+		int s = 0, m = 0;
+		for(int i=0; i<time; i++)
+		{
+			s++;
+			if( s == 60 )
+			{
+				s = 0;
+				m++;
+			}
+		}
+		System.out.println("======================================");
+		System.out.println(String.format("%02d:%02d", m, s));
+		System.out.println("======================================");
+	}
+	
+	public static void runProtocol(Action[] actions, int lines)
+	{
+		int fl = 1;
+		System.out.println("======================================");
+		for(int i=0; i<lines; i++)
+		{
+			
+			if(!actions[i].label.equals("GOTO"))
+			{
+				System.out.println(String.format("%d - %s", fl++, actions[i].label));
+			}
+			else
+			{
+				int no = Integer.parseInt(actions[i].temp);
+				int cnt = Integer.parseInt(actions[i].time);
+				for(int k=0; k<cnt; k++)
+				{
+					for(int j=no-1; j<i; j++)
+					{
+						System.out.println(String.format("%d - %s", fl++, actions[j].label));
+					}
+				}
+			}
+		}
+		System.out.println("======================================");
+	}
 }
