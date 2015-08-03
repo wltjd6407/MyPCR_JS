@@ -26,7 +26,9 @@ public class Main
 	}
 	public static void main(String args[])
 	{
+		String serial = "MyPCR333333";
 		MainUI main = new MainUI();
+		main.setSerialNumber(serial);
 		main.Run();
 		
 	}
