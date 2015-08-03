@@ -10,7 +10,7 @@ public class CallbackDeviceChange extends Thread
 	private DeviceChange m_Callback = null;
 	private String serialNumber = null;
 	
-	private static int previous_counter = 0;
+	private static int previous_counter = -1;
 
 	private CallbackDeviceChange()
 	{}
@@ -54,15 +54,13 @@ public class CallbackDeviceChange extends Thread
 					for( HIDDeviceInfo device : devices )
 					{
 						// 150507 YJ serial number check added
-						if( serialNumber != null && device.getSerial_number() != null ){
-							if( device.getVendor_id() == DeviceConstant.VENDOR_ID && 
-									device.getProduct_id() == DeviceConstant.PRODUCT_ID && 
-									device.getSerial_number().equals(serialNumber))
-							{
-								cnt++;
-								firmwareVersion = device.getRelease_number();
-							}
+						if( device.getVendor_id() == DeviceConstant.VENDOR_ID && 
+							device.getProduct_id() == DeviceConstant.PRODUCT_ID )
+						{
+							cnt++;
+							firmwareVersion = device.getRelease_number();
 						}
+						
 					}
 					
 					if( previous_counter != cnt ){
@@ -74,9 +72,9 @@ public class CallbackDeviceChange extends Thread
 						previous_counter = cnt;
 					}
 				}else{
-					cnt = 0;
-					m_Callback.OnMessage(DeviceChange.DISCONNECTED, cnt + "", firmwareVersion);
-					
+					if( previous_counter != 0 )
+						m_Callback.OnMessage(DeviceChange.DISCONNECTED, "0", firmwareVersion);
+					previous_counter = 0;
 				}
 			}catch(Exception e)
 			{
