@@ -170,7 +170,19 @@ class MyPCRTableModel extends AbstractTableModel
 
 	public void InsertData(Action action)
 	{
-		m_ActionList.add(action);
+		Action temp = new Action(action.getLabel(), action.getTemp(), action.getTime());
+		int time = Integer.parseInt(temp.getTime());
+		if(!temp.getLabel().equals("GOTO"))
+		{
+			if(time/60 > 0 || time%60 > 0)
+				temp.setTime(String.format("%dm %ds", time/60 , time%60));
+			if(time/60 == 0)
+				temp.setTime(String.format("%ds" , time%60));
+			if(time%60 == 0)
+				temp.setTime(String.format("%dm" , time/60));
+		}	
+		
+		m_ActionList.add(temp);
 		fireTableDataChanged();
 	}
 }

@@ -502,7 +502,7 @@ public class PCR_Task
 			hour = minute / 60;
 			minute = minute - hour * 60;
 			
-			if( IsRunning );
+			if( IsRunning && totalTime != 0 )
 				m_MainUI.getProtocolText().setRemainingTimeText((hour < 10 ? "0" + hour : hour) + ":" + (minute < 10 ? "0" + minute : minute) + ":" + (second < 10 ? "0" + second : second));
 		}
 		
