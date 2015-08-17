@@ -318,8 +318,11 @@ public class PCR_Task
 
 			byte readLine = 0;
 			int reqline = 0;
+			// 기계에 전송한 프로토콜이 몇 줄인지 모르기 때문에
 			ArrayList<Action> actions = new ArrayList<Action>();
 			final ProgressDialog dialog = new ProgressDialog(m_MainUI, "Checking the state of the equipment", (int)m_RxAction.getTotal_Action());
+			
+			// Modal 형식으로 띄우기위한 것
 			Thread tempThread = new Thread()
 			{
 				public void run()
@@ -355,6 +358,7 @@ public class PCR_Task
 						reqline = readBuffer[RxAction.RX_REQLINE];
 						m_RxAction.setTotal_Action( tempAction.getTotal_Action() );
 						
+						// 내가 요구한 데이터가 왔을 때
 						if( reqline == readLine )
 						{
 							Action action = new Action("Device Protocol");
@@ -362,14 +366,14 @@ public class PCR_Task
 							{
 								action.setLabel("" + readBuffer[RxAction.RX_LABEL]);
 								action.setTemp("" + readBuffer[RxAction.RX_TEMP]);
-								int time = ((int)(readBuffer[RxAction.RX_TIMEH]*256.) + (int)(readBuffer[RxAction.RX_TIMEL]));
+								int time = ((int)((readBuffer[RxAction.RX_TIMEH]&0xFF)*256.) + (int)((readBuffer[RxAction.RX_TIMEL]&0xFF)));
 								action.setTime("" + time);
 							}
 							else
 							{
 								action.setLabel("GOTO");
 								action.setTemp("" + readBuffer[RxAction.RX_TEMP]);
-								int time = ((int)(readBuffer[RxAction.RX_TIMEH]*256.) + (int)(readBuffer[RxAction.RX_TIMEL]));
+								int time = ((int)((readBuffer[RxAction.RX_TIMEH]&0xFF)*256.) + (int)((readBuffer[RxAction.RX_TIMEL]&0xFF)));
 								action.setTime("" + time);
 							}
 							actions.add(action);

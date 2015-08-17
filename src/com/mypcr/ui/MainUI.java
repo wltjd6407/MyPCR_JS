@@ -449,15 +449,11 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 			case MESSAGE_READ_PROTOCOL:
 				// Protocol 리스트가 담겨있다.
 				Action[] actions = (Action[])data;
-				Action action2 = null;
 				// null 인 경우는 프로토콜 파일을 잘못 불러온 경우
 				if( actions == null )
 					JOptionPane.showMessageDialog(this, "올바르지 않은 Protocol 파일입니다.");
 				else
-					
 				{
-					int total = 0;
-					int goton = 0;
 					// 플래그 초기화
 					IsProtocolRead = false;
 					// action의 0번째 배열의 레이블이 null인 경우는 잘못된 파일인 경우.
@@ -470,33 +466,47 @@ public class MainUI extends JFrame implements Handler, DeviceChange, KeyListener
 					for( Action action : actions )
 					{
 						m_ProtocolList.InsertData(action);
-						if(action.getLabel().equals("GOTO"))
-							goton = Integer.parseInt(action.getTime());
 					}
-				//	JOptionPane.showMessageDialog(null, String.format("%d", goton));
+			
+					int total = 0;
+					int goton = 0;
 					for(int i=0; i<actions.length; i++)
 					{
 						if(!actions[i].getLabel().equals("GOTO"))
 							total += Integer.parseInt(actions[i].getTime());
-						if(actions[i].getLabel().equals("GOTO") && goton >=1 )
+						else
 						{
-							i = Integer.parseInt(actions[i].getTemp()) - 2 ;
-							goton--;
+							int count = Integer.parseInt(actions[i].getTime());
+							if( goton < count )
+							{
+								String gotoLabel = actions[i].getTemp();
+								for(int j=0; j< actions.length; j++)
+								{
+									if(actions[j].getLabel().equals(gotoLabel))
+									{
+										i = j-1;
+										break;
+									}
+								}
+								goton ++;
+							}
+							else
+							{
+								goton = 0;	
+							}
 						}
-						
 					}
 				
-					JOptionPane.showMessageDialog(null, String.format("%d", total));
 					// 받아온 프로토콜들을 멤버변수에 저장해준다.
 					m_ActionList = actions;
 				
 					// 읽어온 프로토콜 파일의 이름을 상단에 표시한다.
 					m_ProtocolText.setProtocolText(actions[0].getProtocolName());
-					int h = total/3600;
-					int m = (total%3600)/60; 
-					int s = (total%3600)%60;
+				
 					m_ProtocolText.setRemainingTimeText(String.format("%02d:%02d:%02d", total/3600,  (total%3600)/60, (total%3600)%60 ));
 					// 읽었으니 플래그 true
+					
+					 
 					IsProtocolRead = true;
 				}
 				break;
