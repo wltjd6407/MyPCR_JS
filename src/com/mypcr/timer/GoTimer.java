@@ -36,7 +36,7 @@ public class GoTimer extends TimerTask
 		m_preheat = preheat;
 		m_Actions = actions; 
 		m_protocol_length = m_Actions.length;
-		m_dialog = new ProgressDialog(m_Handler, "PCR Protocol Transmitting...", m_protocol_length);
+		m_dialog = new ProgressDialog(m_Handler, "PCR Protocol Transmitting...", m_protocol_length+2);
 		Thread TempThread = new Thread()
 		{
 			public void run()
@@ -51,31 +51,35 @@ public class GoTimer extends TimerTask
 	@Override
 	public void run() 
 	{
+		
 		m_dialog.setProgressValue(m_index);
 		
 		if( m_index < m_protocol_length )
 		{
+			
 			try
 			{
-				
+				m_dialog.setDialogLabel(String.format("%d Line is Transmiiting...", m_index));
+				String label = null;
 				byte[] readbuffer = new byte[64];
 				m_Device.read(readbuffer);
 				m_RxAction.set_Info(readbuffer);
 				
 				int time = (m_RxAction.getTime_H()&0xFF)*256 + (m_RxAction.getTime_L()&0xFF);
-				System.out.println(m_index + "===" + m_RxAction.getReqLine());
-				System.out.println( m_Actions[m_index].getLabel() + "===" + m_RxAction.getLabel());
-				System.out.println(m_RxAction.getTemp() + "===" + Integer.parseInt(m_Actions[m_index].getTemp()));
-				System.out.println(time + "===" + Integer.parseInt(m_Actions[m_index].getTime()));
+			
+				if( m_Actions[m_index].getLabel().equals("GOTO"))
+					label = String.format("%d", m_RxAction.getLabel());
+				else
+					label = m_Actions[m_index].getLabel();
 				
-				if( m_Actions[m_index].getLabel().equals(m_RxAction.getLabel() + "") && m_index == m_RxAction.getReqLine() 
-						&& m_RxAction.getTemp() == Integer.parseInt(m_Actions[m_index].getTemp()) && m_index == m_RxAction.getReqLine()){
+				if( label.equals(m_RxAction.getLabel() + "") && m_index == m_RxAction.getReqLine() 
+						&& m_RxAction.getTemp() == Integer.parseInt(m_Actions[m_index].getTemp()) 
+						&& m_index == m_RxAction.getReqLine() && time == Integer.parseInt(m_Actions[m_index].getTime())){
 					m_index++;
-					System.out.println("test");
 				}
 				else{
 					m_Device.write( m_TxAction.Tx_TaskWrite(m_Actions[m_index].getLabel(), m_Actions[m_index].getTemp(), m_Actions[m_index].getTime(), m_preheat, m_index));
-					System.out.println("test2");
+					
 				}
 			}catch(IOException e)
 			{
@@ -86,12 +90,15 @@ public class GoTimer extends TimerTask
 		{
 			try
 			{
-				System.out.println("456");
+				
+				
 				byte[] readbuffer = new byte[64];
 				m_Device.read(readbuffer);
 				m_RxAction.set_Info(readbuffer);
 				if(m_protocol_length == m_RxAction.getTotal_Action())
 				{
+					m_dialog.setDialogLabel("PCR Protocol Transmitting Complete...");
+					m_index++;
 					try
 					{
 						Thread.sleep(10);
@@ -101,6 +108,9 @@ public class GoTimer extends TimerTask
 					}
 					if(m_RxAction.getState() == State.RUN)
 					{
+						m_dialog.setDialogLabel("PCR running...");
+						m_index++;
+						
 						m_Handler.OnHandleMessage(Handler.MESSAGE_TASK_WRITE_END, null);
 						this.cancel();
 						Thread TempThread = new Thread()
